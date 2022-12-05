@@ -1,38 +1,39 @@
 const express = require("express");
 const exphbs = require("express-handlebars");
-const bodyParser = require("body-parser");
-const mysql = require("mysql");
-const path = require("path");
+//const bodyParser = require('body-parser'); // No longer Required
+//const mysql = require('mysql'); // Not required -> moved to userController
 
 require("dotenv").config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = process.env.PORT || 5000;
 
-// body parser middleware
-// parse applicaion/x-www-form-urlencoded
+// Parsing middleware
+// Parse application/x-www-form-urlencoded
 // app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true })); // New
 
-// parse application
+// Parse application/json
 // app.use(bodyParser.json());
+app.use(express.json()); // New
 
-//express body parse
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Static Files
+app.use(express.static("public"));
 
-//static folder
-app.use(express.static(path.join(__dirname, "public")));
-
-//templating engine
-//handlebars
-app.engine(".hbs", exphbs.engine({ extname: ".hbs" }));
+// Templating Engine
+const handlebars = exphbs.create({ extname: ".hbs" });
+app.engine(".hbs", handlebars.engine);
 app.set("view engine", ".hbs");
-app.set("views", "./views");
 
-//routes
-const routes = require("./routes/user");
+// You don't need the connection here as we have it in userController
+// let connection = mysql.createConnection({
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASS,
+//   database: process.env.DB_NAME
+// });
+
+const routes = require("./server/routes/user");
 app.use("/", routes);
 
-app.listen(PORT, () => {
-  console.log(`server is running on port : ${PORT}`);
-});
+app.listen(port, () => console.log(`Listening on port ${port}`));
